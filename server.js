@@ -6,22 +6,23 @@ import authRoutes from "./routes/authRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
 
 dotenv.config();
-connectDB();
 
 const app = express();
 
-app.use(
-  cors({
-    origin: ["http://localhost:3000", "https://your-frontend.vercel.app"],
-    credentials: true,
-  })
-);
-
+// Middleware
+app.use(cors({ origin: "*", credentials: true }));
 app.use(express.json());
 
+// Connect to DB for every invocation (cached)
+app.use(async (req, res, next) => {
+  await connectDB();
+  next();
+});
+
+// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/bookings", bookingRoutes);
 
 // ❌ Remove app.listen()
-// ✅ Export the app
+// ✅ Export app for Vercel serverless function
 export default app;
